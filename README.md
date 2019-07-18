@@ -2,8 +2,11 @@
 
 C++ is great and powerful, but lacks some very basic 
 functions like `string.split`, `vector.group_by`, etc.
-This library allows you to write some basic operations 
+This library allows you to write them
 in C++ like in Ruby, which has sweeeeeet syntactic sugar.
+It's basically a wrapper for `std::string` and some
+containers, extending them with the functionality of
+their counterpart in Ruby.
 
 ## Dependency
 A compiler that supports C++11
@@ -42,11 +45,11 @@ string interpolation. `S_( exp )` will evaluate `exp`
 and turn the result into a string. Beware it includes
 the surrounding `+` symbol, and therefore must be
 used within a chain of string.
-An example:
-`a = 1;`
-`b = 2;`
-`cout << "" S_(a) " plus " S_(b) " equals " S_(a+b) "" << endl;`
-Output:
+An example:  
+`a = 1;`  
+`b = 2;`  
+`cout << "" S_(a) " plus " S_(b) " equals " S_(a+b) "" << endl;`  
+Output:  
 `1 plus 2 equals 3`
 
 I'm also defining a macro `puts`, which is the same as
