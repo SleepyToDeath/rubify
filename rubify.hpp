@@ -69,7 +69,7 @@ namespace Rubify {
 	}
 
 	void break_ () {
-		throw RubifyExecption(BREAK, "Next");
+		throw RubifyExecption(BREAK, "Break");
 	}
 
 	template<typename T>
@@ -88,6 +88,17 @@ namespace Rubify {
 			else
 				return this->std::vector<T>::operator [](this->size() + index);
 		}
+
+		vector<T> drop(size_t count) {
+			vector<T> ret;
+			if (count > this->size())
+				return ret;
+			for (int i=count; i<this->size(); i++) {
+				ret.push_back( (*this)[i] );
+			}
+			return ret;
+		}
+
 
 		vector<T> take(size_t count) {
 			if (count > this->size())

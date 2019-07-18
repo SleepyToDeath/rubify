@@ -27,11 +27,6 @@ Drop it anywhere in your `PATH`.
 `vector` derives `std::vector`, and is equivalence of 
 `Array` in Ruby.
 
-TODO:  
-Hash  
-Enumerator  
-......
-
 C++ lambda is equivalence of block in Ruby.
 
 If the std container already has a function, 
@@ -50,14 +45,14 @@ Types can't be mixed up in a container, nor can elements'
 type be changed(e.g. by `map_`), unless you define everything 
 as subtype of an "Object" class like in Ruby.
 
-To break or continue within a lambda, use `break_` and
-`continue_`. Currently only supported by `each`.
+To break or continue the iteration within a lambda, `break`
+and `continue` won't work. Use `break_` and `continue_` instead.
+Currently only supported in `each`.
 
-A macro `S_` (capital S then underscore) is defined for
-string interpolation. `S_( exp )` will evaluate `exp`
-and turn the result into a string. Beware it includes
-the surrounding `+` symbol, and therefore must be
-used within a chain of string.
+A macro `_S_` is defined for string interpolation. 
+`_S_( exp )` will evaluate `exp` and turn the result 
+into a string. If you are too lazy to type the surrounding `+` 
+symbol, use `S_` instead.  
 An example:  
 `a = 1;`  
 `b = 2;`  
@@ -65,27 +60,45 @@ An example:
 Output:  
 `1 plus 2 equals 3`
 
-I'm also defining a macro `puts`, which is the same as
-the Ruby `puts`. If you find it conflicting with your stuff, 
-undefine it.
+You can undefine `puts` if it's useless for you.
+
+Read comments in source code for more details.
 
 Some tips on using C++ if you've never used C++11 or later:
 
 A lambda is essentially a function pointer, but can
 optionally derive local context.
-The most brainless way to define a lambda is like this:
+The most brainless way to define a lambda is like this:  
 `
-[&]( $arguments ) -> $return_type {
-	$body
-}
+[&]( $arguments ) -> $return_type {  
+	$body  
+}  
 `
 It derives all local contexts and should work in most cases.
 
 Try to use `auto` feature in C++. It saves you a lot of 
-effort typing the type name.
+effort figuring out and typing the proper type name.
 
+## Supported Functions
+`S_` (string interpolation)
 
+`vector`:  
+- `[]` (support negative index)
+- `take`
+- `drop`
+- `each`
+- `group_by`
+- `sort_by`
+- `sort_by_`
+- `map`
+- `map_`
+- `zip`
+- `flatten`
+- `to_s`
+- `join`
 
-
+`string`:
+- `<` (comparison)
+- `split`
 
 
