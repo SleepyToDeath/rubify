@@ -18,9 +18,9 @@ Drop it anywhere in your `PATH`.
 `vector` derives `std::vector`, and is equivalence of 
 `Array` in Ruby.
 
-TODO:
-Hash
-Enumerator
+TODO:  
+Hash  
+Enumerator  
 ......
 
 Anywhere in Ruby a block is required, use a C++ lambda.
