@@ -101,4 +101,9 @@ effort figuring out and typing the proper type name.
 - `<` (comparison)
 - `split`
 
+TODO:
+- more functions in `vector`
+- `Hash`
+- `Enumerator`
+- conversion between types
 
