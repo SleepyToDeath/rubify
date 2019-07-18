@@ -10,7 +10,7 @@
 
 namespace Rubify {
 
-#define puts(exp) std::cout<<exp<<std::endl
+#define puts(exp) std::cout<<(exp)<<std::endl
 
 #define S_(exp) +( [&]()->std::string { \
 	std::stringstream ss;\
