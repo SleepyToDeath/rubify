@@ -8,11 +8,13 @@
 #include<sstream>
 #include<iostream>
 #include<functional>
+#include<type_traits>
 
 namespace Rubify {
 
-/* ======================== Definition ===========================*/
 
+
+/* ==================== Macro ==================== */
 	#define puts(exp) std::cout<<(exp)<<std::endl
 
 	#define _S_(exp) ( [&]()->std::string { \
@@ -23,23 +25,27 @@ namespace Rubify {
 
 	#define S_(exp) +(_S_(exp))+
 
-	enum RubifyExecptionType { ERROR, NEXT, BREAK };
-	
+
+/* ============== Forward Declaration ================ */
 	template<typename T>
 	class vector;
 
+	template < typename KT,
+           typename VT,
+           typename CT = std::less<KT> > 
+	class map;
+
+/* =================== String ==================== */
 	class string: public std::string {
 		public:
 
-		string():std::string() {
-		}
+		/* inherit constructors */
+		using std::string::string;
 
-		string( std::string src):std::string(src) { 
-		}
-
-		string( const char* src ):std::string(src) {
-		}
-
+		/* Inherited copy constructor accepts subclass.
+			So conversion from base class is needed. */
+		string(std::string src): std::string(src) {}
+	
 		bool operator <(string rival) {
 			return compare(rival) > 0;
 		}
@@ -48,6 +54,8 @@ namespace Rubify {
 		vector<string> split(std::string delimiter);
 	};
 
+/* ================= Exception =================== */
+	enum RubifyExecptionType { ERROR, NEXT, BREAK };
 	class RubifyExecption {
 		public:
 		RubifyExecption(string msg) {
@@ -72,16 +80,20 @@ namespace Rubify {
 		throw RubifyExecption(BREAK, "Break");
 	}
 
+
+/* ================= Container =================== */
 	template<typename T>
 	class vector: public std::vector<T> {
 		public:
 
-		vector():std::vector<T>() {
-		}
+		/* ------------- Constructor -------------- */
+		/* inherit constructors */
+		using std::vector<T>::vector;
 
-		vector( std::vector<T> src):std::vector<T>(src) { 
-		}
+		vector(std::vector<T> src): std::vector<T>(src) {}
 
+
+		/* --------------- Access ----------------- */
 		T& operator[](int index) {
 			if (index >= 0)
 				return this->std::vector<T>::operator [](index);
@@ -130,18 +142,20 @@ namespace Rubify {
 			return (*this);
 		}
 
+
+		/* ------------- Reorganize -------------- */
 		template<typename T2>
 		vector< vector<T> > group_by( std::function< T2(T) > lambda) {
 			vector< vector<T> > ret;
-			std::map< T2, vector<T> > boxes;
+			Rubify::map< T2, vector<T> > boxes;
 			for (int i=0; i<this->size(); i++)
 			{
 				T value = (*this)[i];
 				T2 key = lambda(value);
 				boxes[key].push_back(value);
 			}
-			for_each(boxes.begin(), boxes.end(), [&](std::pair< T2, vector<T> > p) {
-				ret.push_back(p.second);
+			boxes.each( [&]( T2 k, vector<T> v) {
+				ret.push_back(v);
 			});
 			return ret;
 		}
@@ -205,6 +219,8 @@ namespace Rubify {
 			return ret;
 		}
 
+
+		/* ------------- String --------------- */
 		string join(std::string delimiter) {
 			if (this->size() == 0)
 				return std::string("");
@@ -223,42 +239,66 @@ namespace Rubify {
 			}).join(" ");
 		}
 
-	};
 
-/*
-	template<T>
-	class vector< vector<T> >: public std::vector< vector<T> > {
-		vector<T> flatten() {
-			vector<T> ret;
-			each( [&](T& sub_vector) {
-				sub_vector.each( [&](T& element) {
-					ret.push_back(element);
-				})
-			})
+		/* ------------- Conversion --------------- */
+		template<typename T2>
+		Rubify::map<std::enable_if<std::is_same<T, vector<T2> >::value , T2>, std::enable_if<std::is_same<T, vector<T2> >::value , T2 > > to_h() {
+			Rubify::map<T2, T2> ret;
+			this->each( [&] (T& pair) {
+				ret[pair[0]] = pair[1];
+			});
 			return ret;
 		}
-	}
 
-	template<>
-	class vector<string>: public std::vector<string> {
-		public:
-		string join(std::string delimiter) {
-			if (size() == 0)
-				return std::string("");
-			string ret = (*this)[0];
-			for (int i=1; i<size(); i++)
+	};
+
+	template < typename KT,
+           typename VT,
+           typename CT> 
+	class map: public std::map<KT, VT, CT> {
+
+		/* ------------- Constructor -------------- */
+		using std::map<KT, VT, CT>::map;
+
+		map(std::map<KT, VT, CT> src): std::map<KT, VT, CT>(src) {}
+
+		/* --------------- Access ----------------- */
+		Rubify::map<KT, VT, CT>& each( std::function< void(KT, VT&) > lambda ) {
+			for (auto it=this->begin(); it != this->end(); it++)
 			{
-				ret += delimiter;
-				ret += (*this)[i];
+				try 
+				{
+					lambda(it->first, it->second);
+				}
+				catch (RubifyExecption e)
+				{
+					if (e.type == ERROR)
+						throw e;
+					else if (e.type == BREAK)
+						break;
+					else
+						continue;
+				}
 			}
+			return (*this);
+		}
+
+
+		/* ------------- Conversion --------------- */
+		vector< vector<VT> > to_a() {
+			vector< vector<VT> > ret;
+			this->each( [&] (VT k, VT v) {
+				vector<VT> pair;
+				pair.push_back(k);
+				pair.push_back(v);
+				ret.push_back(pair);
+			});
 			return ret;
 		}
-	};
-
-	*/
+   };
 
 
-/* ======================== Implementation ===========================*/
+/* ======================== Delayed Implementation ===========================*/
 
 
 	vector<string> string::split(std::string delimiter) {
