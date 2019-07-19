@@ -92,6 +92,8 @@ namespace Rubify {
 
 		vector(std::vector<T> src): std::vector<T>(src) {}
 
+		vector(T array[]): std::vector<T>(array, array+sizeof(array)/sizeof(T)) {}
+
 
 		/* --------------- Access ----------------- */
 		T& operator[](int index) {
@@ -123,11 +125,11 @@ namespace Rubify {
 		}
 
 		vector<T>& each( std::function< void(T&) > lambda ) {
-			for (int i=0; i<this->size(); i++)
+			for (auto it=this->begin(); it!=this->end(); it++)
 			{
 				try 
 				{
-					lambda((*this)[i]);
+					lambda(*it);
 				}
 				catch (RubifyExecption e)
 				{
@@ -142,18 +144,53 @@ namespace Rubify {
 			return (*this);
 		}
 
+		/* -------------- Interact -------------- */
+		vector<T> operator &(vector<T> another) {
+			auto exist = this->zip( vector(this->size(), true) ).to_h();
+			vector<T> ret;
+			another->each( [&] (T& e) {
+				if (exist.count(e) > 0)
+					ret.push_back(e);
+			});
+			return ret;
+		}
+
+		vector<T>& operator +=(vector<T> another) {
+			another.each( [&](T& e) {
+				this->push_back(e);
+			});
+			return (*this);
+		}
+
+		vector<T> operator +(vector<T> another) {
+			auto ret = (*this);
+			another.each( [&](T& e) {
+				ret.push_back(e);
+			});
+			return ret;
+		}
+
+		string operator *(string delimiter) {
+			return this->join(delimiter);
+		}
+
+		vector<T> operator *(size_t times) {
+			vector<T> ret;
+			for (int i=0; i<times; i++)
+				ret += (*this);
+			return ret;
+		}
+
 
 		/* ------------- Reorganize -------------- */
 		template<typename T2>
 		vector< vector<T> > group_by( std::function< T2(T) > lambda) {
 			vector< vector<T> > ret;
 			Rubify::map< T2, vector<T> > boxes;
-			for (int i=0; i<this->size(); i++)
-			{
-				T value = (*this)[i];
+			this->each( [&] (T& value) {
 				T2 key = lambda(value);
 				boxes[key].push_back(value);
-			}
+			});
 			boxes.each( [&]( T2 k, vector<T> v) {
 				ret.push_back(v);
 			});
@@ -196,14 +233,14 @@ namespace Rubify {
 		/* If lengths are different, the function will 
 			only zip until the end of the shorter one.
 			The rest are DROPPED */
-		vector< vector<T> > zip( vector<T> buddy ) {
-			size_t len = this->size() < buddy.size() ? this->size() : buddy.size();
+		vector< vector<T> > zip( vector<T> another ) {
+			size_t len = this->size() < another.size() ? this->size() : another.size();
 			vector< vector<T> > ret;
 			for (int i=0; i<len; i++)
 			{
 				vector<T> zipped;
 				zipped.push_back( (*this)[i] );
-				zipped.push_back( buddy[i] );
+				zipped.push_back( another[i] );
 				ret.push_back(zipped);
 			}
 			return ret;
@@ -224,11 +261,11 @@ namespace Rubify {
 		string join(std::string delimiter) {
 			if (this->size() == 0)
 				return std::string("");
-			string ret = (*this)[0];
+			string ret = _S_( (*this)[0] );
 			for (int i=1; i<this->size(); i++)
 			{
 				ret += delimiter;
-				ret += (*this)[i];
+				ret += _S_( (*this)[i] );
 			}
 			return ret;
 		}
@@ -251,6 +288,8 @@ namespace Rubify {
 		}
 
 	};
+
+
 
 	template < typename KT,
            typename VT,
