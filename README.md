@@ -80,10 +80,18 @@ Try to use `auto` feature in C++. It saves you a lot of
 effort figuring out and typing the proper type name.
 
 ## Supported Functions
-`S_` (string interpolation)
+`S_` 
+`_S_` (string interpolation)
+
+`continue_`
+`break_`
 
 `vector`:  
 - `[]` (support negative index)
+- `+`
+- `+=`
+- `&`
+- `*`
 - `take`
 - `drop`
 - `each`
@@ -96,14 +104,19 @@ effort figuring out and typing the proper type name.
 - `flatten`
 - `to_s`
 - `join`
+- `to_h`
 
 `string`:
 - `<` (comparison)
 - `split`
 
+`map`:
+- `each`
+- `to_a`
+
 TODO:
 - more functions in `vector`
-- `Hash`
+- more functions in `map`
 - `Enumerator`
 - conversion between types
 
