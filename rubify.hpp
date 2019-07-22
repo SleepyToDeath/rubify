@@ -19,7 +19,7 @@ namespace Rubify {
 
 	#define _S_(exp) ( [&]()->std::string { \
 		std::stringstream ss;\
-		ss << (exp);\
+		ss << (Rubify::StringFactory< decltype(exp) >::convert(exp));\
 		return ss.str();\
 	}() )
 
@@ -47,11 +47,54 @@ namespace Rubify {
 		string(std::string src): std::string(src) {}
 	
 		bool operator <(string rival) {
-			return compare(rival) > 0;
+			return compare(rival) < 0;
 		}
 
 		/* implementation moved below to break dependency cycle */
 		vector<string> split(std::string delimiter);
+	};
+
+	/* helper type */
+	template <typename T>
+	class has_to_s
+	{
+		typedef char one;
+		struct two { char x[2]; };
+
+		/* [TODO] to be frank I don't know why `...` always has a lower priority.
+			Better confirm this from some C++ document */
+		template <typename ALIAS> static one test( decltype(&ALIAS::to_s) ) ;
+		template <typename ALIAS> static two test(...); 
+
+		public:
+		enum { value = sizeof(test<T>(0)) == sizeof(char) };
+	};
+
+	/* helper type */
+	/*	Try every possible way to turn a type to a format
+		acceptable by stringstream at compile time.
+		[!] All conditions must be exclusive.
+		That is, no 2 of them can be true at the same time.
+		But they can all be false. In that case, the type
+		can not be fed to stringstream and there is a 
+		compile error.
+		Beware to use ALIAS type in the condition because
+		it must take effect at the point of that member
+		function's specialization.
+		*/
+	template<typename T>
+	class StringFactory{
+		public:
+
+		template<typename ALIAS = T, typename = typename std::enable_if<!has_to_s<ALIAS>::value>::type >
+		static ALIAS convert(ALIAS t) {
+			return t;
+		}
+
+		template<typename ALIAS = T, typename = typename std::enable_if<has_to_s<ALIAS>::value>::type >
+		static string convert(ALIAS t) {
+			return t.to_s();
+		}
 	};
 
 /* ================= Exception =================== */
@@ -122,6 +165,27 @@ namespace Rubify {
 				ret.push_back( (*this)[i] );
 			}
 			return ret;
+		}
+
+		/* equivalent to xxx.each do |index, element| */
+		vector<T>& each( std::function< void(int, T&) > lambda ) {
+			for (int i =0; i<this->size(); i++)
+			{
+				try 
+				{
+					lambda(i, (*this)[i]);
+				}
+				catch (RubifyExecption e)
+				{
+					if (e.type == ERROR)
+						throw e;
+					else if (e.type == BREAK)
+						break;
+					else
+						continue;
+				}
+			}
+			return (*this);
 		}
 
 		vector<T>& each( std::function< void(T&) > lambda ) {
@@ -246,10 +310,10 @@ namespace Rubify {
 			return ret;
 		}
 
-		vector<T> flatten() {
-			vector<T> ret;
+		T flatten() {
+			T ret;
 			each( [&](T& sub_vector) {
-				sub_vector.each( [&](T& element) {
+				sub_vector.each( [&](decltype(sub_vector[0])& element) {
 					ret.push_back(element);
 				});
 			});
@@ -270,10 +334,10 @@ namespace Rubify {
 			return ret;
 		}
 
-		string to_s() {
-			return this->map<string>( [&](T element) -> string {
+		string to_s(int i = 0) {
+			return "[ "+ this->map<string>( [&](T element) -> string {
 				return _S_(element);
-			}).join(" ");
+			}).join(", ") + " ]";
 		}
 
 
@@ -295,6 +359,8 @@ namespace Rubify {
            typename VT,
            typename CT> 
 	class map: public std::map<KT, VT, CT> {
+
+		public:
 
 		/* ------------- Constructor -------------- */
 		using std::map<KT, VT, CT>::map;
@@ -322,6 +388,16 @@ namespace Rubify {
 			return (*this);
 		}
 
+		/* ------------- String --------------- */
+		string to_s() {
+			string ret = "{ ";
+			this->each( [&](KT key, VT value) {
+				ret += "" S_(key) " => " S_(value)", ";
+			});
+			ret = ret.substr(0, ret.length()-2);
+			ret += " }";
+			return ret;
+		}
 
 		/* ------------- Conversion --------------- */
 		vector< vector<VT> > to_a() {

@@ -14,6 +14,9 @@ to stay compatible with native C++. For example, elements
 are not assumed to always be pointers, and there's no 
 universal parent type "Object".
 
+## Examples
+See `test.cpp`.
+
 ## Dependency
 A compiler that supports C++11
 
@@ -21,11 +24,14 @@ A compiler that supports C++11
 Drop it anywhere in your `PATH`.
 
 ## Coding Conventions
-`string` derives `std::string`, and is equivalence of 
+`Rubify::string` derives `std::string`, and is equivalence of 
 `String` in Ruby.
 
-`vector` derives `std::vector`, and is equivalence of 
+`Rubify::vector` derives `std::vector`, and is equivalence of 
 `Array` in Ruby.
+
+`Rubify::map` derives `std::map`, and is equivalence of 
+`Hash` in Ruby.
 
 C++ lambda is equivalence of block in Ruby.
 
@@ -47,11 +53,14 @@ as subtype of an "Object" class like in Ruby.
 
 To break or continue the iteration within a lambda, `break`
 and `continue` won't work. Use `break_` and `continue_` instead.
-Currently only supported in `each`.
+Currently only supported in `each`. Usage in other situations
+will cause an exception.
 
 A macro `_S_` is defined for string interpolation. 
 `_S_( exp )` will evaluate `exp` and turn the result 
-into a string. If you are too lazy to type the surrounding `+` 
+into a string. `exp`'s result type must either has `to_s()`
+function defined or can be fed to stringstream.   
+If you are too lazy to type the surrounding `+`
 symbol, use `S_` instead.  
 An example:  
 `a = 1;`  
@@ -67,17 +76,20 @@ Read comments in source code for more details.
 Some tips on using C++ if you've never used C++11 or later:
 
 A lambda is essentially a function pointer, but can
-optionally derive local context.
+optionally capture local context.
 The most brainless way to define a lambda is like this:  
-`
-[&]( $arguments ) -> $return_type {  
-	$body  
-}  
-`
-It derives all local contexts and should work in most cases.
+`[&]( $arguments ) -> $return_type {`  
+`	$body`  
+`}`  
+It captures all local contexts and should work in most cases.
 
 Try to use `auto` feature in C++. It saves you a lot of 
-effort figuring out and typing the proper type name.
+effort figuring out and typing the proper type name.  
+For example:
+`auto add = [&](int a, int b) -> int {`  
+`	return a+b;`  
+`};`  
+`auto c = add(1, 2);`  
 
 ## Supported Functions
 `S_` 
@@ -113,6 +125,7 @@ effort figuring out and typing the proper type name.
 `map`:
 - `each`
 - `to_a`
+- `to_s` 
 
 TODO:
 - more functions in `vector`
