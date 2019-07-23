@@ -50,8 +50,23 @@ namespace Rubify {
 			return compare(rival) < 0;
 		}
 
-		/* implementation moved below to break dependency cycle */
-		vector<string> split(std::string delimiter);
+		/* [!] Using std::vector due to dependency loop.
+			If this happens too much in the future,
+			will consider splitting definition into 
+			a separate cpp. */
+		std::vector<string> split(std::string delimiter) {
+			string remain = *this;
+			std::vector<string> ret;
+			while (remain.find(delimiter) != std::string::npos)
+			{
+				ret.push_back(remain.substr(0, remain.find(delimiter)));
+				remain.erase(0, remain.find(delimiter) + delimiter.length());
+			}
+			ret.push_back(remain);
+			return ret;
+		}
+
+
 	};
 
 	/* helper type */
@@ -115,13 +130,9 @@ namespace Rubify {
 		string msg;
 	};
 
-	void continue_ () {
-		throw RubifyExecption(NEXT, "Next");
-	}
+	inline void continue_() { throw RubifyExecption(NEXT, "Next"); }
 
-	void break_ () {
-		throw RubifyExecption(BREAK, "Break");
-	}
+	inline void break_() { throw RubifyExecption(BREAK, "Break"); } 
 
 
 /* ================= Container =================== */
@@ -145,6 +156,14 @@ namespace Rubify {
 			else
 				return this->std::vector<T>::operator [](this->size() + index);
 		}
+
+		const T& operator[](int index) const {
+			if (index >= 0)
+				return this->std::vector<T>::operator [](index);
+			else
+				return this->std::vector<T>::operator [](this->size() + index);
+		}
+
 
 		vector<T> drop(size_t count) {
 			vector<T> ret;
@@ -353,7 +372,24 @@ namespace Rubify {
 
 	};
 
+	/* Eat shit C++ standard committee! */
+	template<>
+	class vector<bool>: public std::vector<bool> {
+		public:
+		std::vector<bool>::reference operator[](int index) {
+			if (index >= 0)
+				return this->std::vector<bool>::operator [](index);
+			else
+				return this->std::vector<bool>::operator [](this->size() + index);
+		}
 
+		bool operator[](int index) const {
+			if (index >= 0)
+				return this->std::vector<bool>::operator [](index);
+			else
+				return this->std::vector<bool>::operator [](this->size() + index);
+		}
+	};
 
 	template < typename KT,
            typename VT,
@@ -415,18 +451,6 @@ namespace Rubify {
 
 /* ======================== Delayed Implementation ===========================*/
 
-
-	vector<string> string::split(std::string delimiter) {
-		string remain = *this;
-		vector<string> ret;
-		while (remain.find(delimiter) != std::string::npos)
-		{
-			ret.push_back(remain.substr(0, remain.find(delimiter)));
-			remain.erase(0, remain.find(delimiter) + delimiter.length());
-		}
-		ret.push_back(remain);
-		return ret;
-	}
 
 };
 
