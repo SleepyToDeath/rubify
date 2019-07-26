@@ -50,20 +50,11 @@ namespace Rubify {
 			return compare(rival) < 0;
 		}
 
-		/* [!] Using std::vector due to dependency loop.
-			If this happens too much in the future,
-			will consider splitting definition into 
-			a separate cpp. */
-		std::vector<string> split(std::string delimiter) {
-			string remain = *this;
-			std::vector<string> ret;
-			while (remain.find(delimiter) != std::string::npos)
-			{
-				ret.push_back(remain.substr(0, remain.find(delimiter)));
-				remain.erase(0, remain.find(delimiter) + delimiter.length());
-			}
-			ret.push_back(remain);
-			return ret;
+		/* implementation put into cpp to break dependency cycle */
+		vector<string> split(std::string delimiter);
+
+		int to_i() {
+			return std::stoi(*this);
 		}
 
 
@@ -297,6 +288,23 @@ namespace Rubify {
 		}
 
 		template<typename T2>
+		vector<T2> map( std::function< T2(int, T) > lambda) {
+			vector<T2> ret;
+			each( [&](int index, T& element){
+				ret.push_back(lambda(index, element));
+			});
+			return ret;
+		}
+
+		vector<T>& map_( std::function< T(int, T&) > lambda ) {
+			each( [&](int index, T& element){
+				element = lambda(index, element);
+			});
+			return *this;
+		}
+
+
+		template<typename T2>
 		vector<T2> map( std::function< T2(T) > lambda) {
 			vector<T2> ret;
 			each( [&](T& element){
@@ -312,7 +320,49 @@ namespace Rubify {
 			return *this;
 		}
 
-	
+		vector<T> slice(int start, int length) {
+			if (start < 0)
+				start = this->size() + start;
+			if (start < 0 || start + length > this->size() )
+				throw RubifyExecption("out of bound");
+			vector<T> ret;
+			for (int i=start; i<start+length; i++)
+				ret.push_back((*this)[i]);
+			return ret;
+		}
+
+
+		/* 	Normalized zip.
+			The shorter vector will propotionally repeat 
+			its elements to make both vectors equally long.
+			For example, 
+			[1, 2].norm_zip([3,4,5,6])
+			= [1,1,2,2].zip([3,4,5,6])
+			= [[1,3],[1,4],[2,5],[2,6]] 
+			*/
+		vector< vector<T> > norm_zip( vector<T> another ) {
+			if (this->size() > another.size())
+				return another.norm_zip(*this).each([](vector<T>& pair) {
+					T tmp = pair[0];
+					pair[0] = pair[1];
+					pair[1] = tmp;
+				});
+			vector< vector<T> > ret;
+			int j = 0;
+			for (int i=0; i<this->size(); i++)
+			{
+				while(j<another.size() && (j+1)*this->size() <= (i+1)*another.size())
+				{
+					vector<T> zipped;
+					zipped.push_back( (*this)[i] );
+					zipped.push_back( another[j] );
+					ret.push_back(zipped);
+					j++;
+				}
+			}
+			return ret;
+		}
+
 		/* If lengths are different, the function will 
 			only zip until the end of the shorter one.
 			The rest are DROPPED */

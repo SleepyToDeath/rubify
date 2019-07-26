@@ -46,6 +46,11 @@ void test_conversion() {
 	puts(m.to_s());
 	puts(m.to_a().to_s());
 	puts(m.to_a().flatten().to_s());
+
+	vector<int>mask(3,0);
+	mask[1] = 1;
+	mask[2] = 2;
+	puts(m.to_a().flatten().norm_zip(mask).to_s());
 }
 
 struct People {

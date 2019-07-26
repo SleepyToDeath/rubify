@@ -1,2 +1,2 @@
 all: rubify.hpp test.cpp
-	g++ -g -o test test.cpp -std=c++11
+	g++ -g -o test rubify.cpp test.cpp -std=c++11

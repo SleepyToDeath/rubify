@@ -18,7 +18,7 @@ universal parent type "Object".
 See `test.cpp`.
 
 ## Dependency
-A compiler that supports C++11
+A compiler that supports C++11. (C++14 is recommended)
 
 ## Installation
 Drop it anywhere in your `PATH`.
