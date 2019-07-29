@@ -258,7 +258,7 @@ namespace Rubify {
 
 		/* ------------- Reorganize -------------- */
 		template<typename T2>
-		vector< vector<T> > group_by( std::function< T2(T) > lambda) {
+		vector< vector<T> > group_by( std::function< T2(const T&) > lambda) {
 			vector< vector<T> > ret;
 			Rubify::map< T2, vector<T> > boxes;
 			this->each( [&] (T& value) {
@@ -273,14 +273,14 @@ namespace Rubify {
 
 		/* '<' operator must be defined for T2 */
 		template<typename T2>
-		vector<T> sort_by( std::function< T2(T) > lambda) {
+		vector<T> sort_by( std::function< T2(const T&) > lambda) {
 			vector<T> cp = *this;
 			cp.sort_by_(lambda);
 			return cp;
 		}
 
 		template<typename T2>
-		vector<T>& sort_by_( std::function< T2(T) > lambda) {
+		vector<T>& sort_by_( std::function< T2(const T&) > lambda) {
 			std::sort(this->begin(), this->end(), [&](T a, T b) -> bool {
 				return lambda(a) < lambda(b);
 			});
@@ -288,7 +288,7 @@ namespace Rubify {
 		}
 
 		template<typename T2>
-		vector<T2> map( std::function< T2(int, T) > lambda) {
+		vector<T2> map( std::function< T2(int, const T&) > lambda) {
 			vector<T2> ret;
 			each( [&](int index, T& element){
 				ret.push_back(lambda(index, element));
@@ -296,7 +296,7 @@ namespace Rubify {
 			return ret;
 		}
 
-		vector<T>& map_( std::function< T(int, T&) > lambda ) {
+		vector<T>& map_( std::function< T(int, const T&) > lambda ) {
 			each( [&](int index, T& element){
 				element = lambda(index, element);
 			});
@@ -305,7 +305,7 @@ namespace Rubify {
 
 
 		template<typename T2>
-		vector<T2> map( std::function< T2(T) > lambda) {
+		vector<T2> map( std::function< T2(const T&) > lambda) {
 			vector<T2> ret;
 			each( [&](T& element){
 				ret.push_back(lambda(element));
@@ -313,7 +313,7 @@ namespace Rubify {
 			return ret;
 		}
 
-		vector<T>& map_( std::function< T(T&) > lambda ) {
+		vector<T>& map_( std::function< T(const T&) > lambda ) {
 			each( [&](T& element){
 				element = lambda(element);
 			});

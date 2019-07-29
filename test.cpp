@@ -105,6 +105,11 @@ void test_group_n_sort() {
 	
 }
 
+void test_stoi()
+{
+	puts(string("123").to_i());
+}
+
 
 
 int main() {
@@ -112,4 +117,5 @@ int main() {
 	test_break_n_continue();
 	test_conversion();
 	test_group_n_sort();
+	test_stoi();
 }
