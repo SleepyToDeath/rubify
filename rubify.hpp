@@ -13,6 +13,15 @@
 namespace Rubify {
 
 
+/* ============== Forward Declaration ================ */
+	template<typename T>
+	class vector;
+
+	template < typename KT,
+           typename VT,
+           typename CT = std::less<KT> > 
+	class map;
+
 
 /* ==================== Macro ==================== */
 	#define puts(exp) std::cout<<(exp)<<std::endl
@@ -25,15 +34,6 @@ namespace Rubify {
 
 	#define S_(exp) +(_S_(exp))+
 
-
-/* ============== Forward Declaration ================ */
-	template<typename T>
-	class vector;
-
-	template < typename KT,
-           typename VT,
-           typename CT = std::less<KT> > 
-	class map;
 
 /* =================== String ==================== */
 	class string: public std::string {
@@ -499,8 +499,55 @@ namespace Rubify {
    };
 
 
-/* ======================== Delayed Implementation ===========================*/
+/* ================ Helper Functions ==================== */
+	/* same id = same event */
+	inline void do_once(int id, std::function< void(void) > something) {
+		static map<int, int> counter;
+		if (counter.count(id) == 0)
+		{
+			something();
+			counter[id] = 0;
+		}
+	}
 
+	inline void do_a_few_times(int id, int times, std::function< void(void) > something) {
+		static map<int, int> counter;
+		if (counter.count(id) == 0)
+			counter[id] = 0;
+		if (counter[id] < times)
+		{
+			something();
+			counter[id]++;
+		}
+	}
+
+	inline void do_at_interval(int id, int interval, std::function< void(void) > something) {
+		static map<int, int> count_down;
+		if (count_down.count(id) == 0)
+			count_down[id] = 0;
+		if (count_down[id] == 0)
+			something();
+		count_down[id] = (count_down[id] + 1) % interval;
+	}
+
+	inline void do_a_few_times_at_interval(int id, int times, int interval, std::function< void(void) > something) {
+		static map<int, int> counter;
+		static map<int, int> count_down;
+		if (counter.count(id) == 0)
+		{
+			counter[id] = 0;
+			count_down[id] = 0;
+		}
+		if (counter[id] < times)
+		{
+			if (count_down[id] == 0)
+			{
+				something();
+				counter[id]++;
+			}
+			count_down[id] = (count_down[id] + 1) % interval;
+		}
+	}
 
 };
 

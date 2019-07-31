@@ -5,6 +5,10 @@ using Rubify::string;
 using Rubify::map;
 using Rubify::continue_;
 using Rubify::break_;
+using Rubify::do_once;
+using Rubify::do_at_interval;
+using Rubify::do_a_few_times;
+using Rubify::do_a_few_times_at_interval;
 
 /* expect:
 [ 10, 1, 1, 2, 2 ] */
@@ -111,6 +115,19 @@ void test_stoi()
 }
 
 
+void test_debug()
+{
+	for (int i=0; i<30; i++)
+	{
+		puts("["S_(i)"]");
+		do_once( 1, [&]() { std::cout<<"| do once! |"; } );
+		do_a_few_times( 2, 5, [&]() { std::cout<<"| do 5 times! |"; } );
+		do_at_interval( 3, 3, [&]() { std::cout<<"| do at interval 3! |"; } );
+		do_a_few_times_at_interval( 4, 5, 5, [&]() { std::cout<<"| do 5 times at interval 5! |"; } );
+		puts(" ");
+	}
+}
+
 
 int main() {
 	test_access();
@@ -118,4 +135,5 @@ int main() {
 	test_conversion();
 	test_group_n_sort();
 	test_stoi();
+	test_debug();
 }
