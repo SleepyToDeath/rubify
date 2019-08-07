@@ -128,6 +128,55 @@ void test_debug()
 	}
 }
 
+void need_int(int lvl)
+{
+	if (lvl == 0)
+	{
+		int seven = require_(int, 7);
+		puts(seven);
+	}
+	else
+	{
+		provide_([&](int name)->int {
+			if (name == lvl)
+				return lvl;
+			else
+				return require_(int, name);
+		} )
+		need_int(lvl - 1);
+	}
+}
+
+string arbic_to_english[] = {"zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "eleven"};
+
+void need_string(int lvl)
+{
+	if (lvl == 0)
+	{
+		string eleven = require_(string, string("11"));
+		puts(eleven);
+	}
+	else
+	{
+		provide_([&](string name)->string {
+			if (name == _S_(lvl))
+				return arbic_to_english[lvl];
+			else
+				return require_(string, name);
+		} )
+		need_string(lvl - 1);
+	}
+}
+
+/* expected output:
+7
+eleven
+*/
+void test_algebraic_effect()
+{
+	need_int(10);
+	need_string(20);
+}
 
 int main() {
 	test_access();
@@ -136,4 +185,6 @@ int main() {
 	test_group_n_sort();
 	test_stoi();
 	test_debug();
+	test_algebraic_effect();
 }
+

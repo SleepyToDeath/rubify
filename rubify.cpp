@@ -1,4 +1,4 @@
-#include "rubify.hpp"
+#include "real_rubify.hpp"
 
 namespace Rubify {
 
@@ -13,6 +13,9 @@ namespace Rubify {
 		ret.push_back(remain);
 		return ret;
 	}
+
+	template<typename Want, typename Have>
+	vector< std::function<Want(Have)> > AlgebraicEffect<Want, Have>::stack;
 
 };
 
