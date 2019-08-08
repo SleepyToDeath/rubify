@@ -14,16 +14,28 @@ to stay compatible with native C++. For example, elements
 are not assumed to always be pointers, and there's no 
 universal parent type "Object".
 
+In addition, there are some experimental features
+that I find useful but not necessarily supported by
+Ruby, such as `do_once`, Algebraic Effects, etc.
+
 ## Examples
 See `test.cpp`.
 
 ## Dependency
-A compiler that supports C++11. (C++14 is recommended)
+If you don't use Algebraic Effects:
+A compiler that supports C++11
+
+If you use Algebraic Effects:
+A compiler that supports C++2a (for type deduction)
 
 ## Installation
 Drop it anywhere in your `PATH`.
+Include `rubify.hpp`.
+Add `rubify.cpp` to your source file for compiling.
 
 ## Coding Conventions
+
+### Containers
 `Rubify::string` derives `std::string`, and is equivalence of 
 `String` in Ruby.
 
@@ -35,6 +47,7 @@ Drop it anywhere in your `PATH`.
 
 C++ lambda is equivalence of block in Ruby.
 
+### Member functions
 If the std container already has a function, 
 (e.g., `push_back`), it won't be overridden(e.g. by `append`). 
 Otherwise, the function name and 
@@ -56,6 +69,7 @@ and `continue` won't work. Use `break_` and `continue_` instead.
 Currently only supported in `each`. Usage in other situations
 will cause an exception.
 
+### String interpolation
 A macro `_S_` is defined for string interpolation. 
 `_S_( exp )` will evaluate `exp` and turn the result 
 into a string. `exp`'s result type must either has `to_s()`
@@ -71,7 +85,33 @@ Output:
 
 You can undefine `puts` if it's useless for you.
 
-Read comments in source code for more details.
+### Algebraic Effects
+I'm actually not a super fan of FP. My knowledge about this mechanism
+mainly comes from [this article](https://overreacted.io/algebraic-effects-for-the-rest-of-us/).
+[And here is a Chinese translation](https://zhuanlan.zhihu.com/p/76158581).
+I recommend reading the article for a better understanding of it.
+
+There are 2 keywords in my implementation: `require_` and `provide_`.
+`require_` is like `throw`. It throws a requirement that can be caught
+by `provide_` block (similar to `catch`). The interface `require_(Want, name)`
+throws a requirement with return type of `Want`. `name` is literally the name
+of the required thing. It can be of any type.
+
+`provide_(handler)` can catch a requirement and feed it to `handler`, which 
+is a function pointer or a lambda. After calling `require_(Want, name)`, 
+the first handler up in the stack that accepts 
+`name` (type must be the same) and returns a value of `Want` type will catch the
+thrown requirement. If the requirement can be handled, the program will jump
+back to the place `require_` is called and replace the statement with the
+return value. Otherwise the handler can call `return require_(Want, name);`
+to throw the requirement again to upper levels. If no handler in the stack
+can handle it, `name` will be thrown as an exception.
+
+One example can be found in `test.cpp` where a recursive function dive into
+multiple levels and require a value provided by an upper level from the bottom.
+
+### Tips
+Read comments in `real_rubify.hpp` for more details.
 
 Some tips on using C++ if you've never used C++11 or later:
 
@@ -92,11 +132,13 @@ For example:
 `auto c = add(1, 2);`  
 
 ## Supported Functions
-`S_` 
-`_S_` (string interpolation)
+String interpolation
+- `S_` 
+- `_S_`
 
-`continue_`
-`break_`
+Short circuit
+- `continue_`
+- `break_`
 
 `vector`:  
 - `[]` (support negative index)
@@ -106,13 +148,14 @@ For example:
 - `*`
 - `take`
 - `drop`
-- `each`
+- `each` (with/without index)
 - `group_by`
 - `sort_by`
 - `sort_by_`
-- `map`
-- `map_`
+- `map` (with/without index)
+- `map_` (with/without index)
 - `zip`
+- `norm_zip` (duplicate the shorter vector's elements to make them equally long, then zip)
 - `flatten`
 - `to_s`
 - `join`
@@ -127,9 +170,18 @@ For example:
 - `to_a`
 - `to_s` 
 
+Algebraic effects
+- `provide_`
+- `require_`
+
+Helper functions
+- `do_once`
+- `do_a_few_times`
+- `do_at_interval`
+- `do_a_few_times_at_interval`
+
 TODO:
-- more functions in `vector`
-- more functions in `map`
+- more functions
 - `Enumerator`
 - conversion between types
 
