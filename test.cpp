@@ -147,7 +147,7 @@ void need_int(int lvl)
 	}
 }
 
-string arbic_to_english[] = {"zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "eleven"};
+string arabic_to_english[] = {"zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "eleven"};
 
 void need_string(int lvl)
 {
@@ -160,7 +160,7 @@ void need_string(int lvl)
 	{
 		provide_([&](string name)->string {
 			if (name == _S_(lvl))
-				return arbic_to_english[lvl];
+				return arabic_to_english[lvl];
 			else
 				return require_(string, name);
 		} )

@@ -199,8 +199,11 @@ namespace Rubify {
 		typedef Arg arg_type;
 	};
 
+	#define __DO_CONCAT__(x, y) x##y
+	#define __REAL_DO_CONCAT__(x, y) __DO_CONCAT__(x, y)
+
 	#define provide_(handler) \
-		Rubify::PopStackHelper pop_stack_helper_##__LINE__(Rubify::AlgebraicEffect< \
+		Rubify::PopStackHelper __REAL_DO_CONCAT__(pop_stack_helper_, __LINE__)(Rubify::AlgebraicEffect< \
 		Rubify::unary_function_traits<decltype(handler)>::result_type, \
 		Rubify::unary_function_traits<decltype(handler)>::arg_type \
 		>::provide(handler));
