@@ -208,8 +208,18 @@ namespace Rubify {
 		Rubify::unary_function_traits<decltype(handler)>::arg_type \
 		>::provide(handler));
 
+	template <typename T>
+	class MaybeString{
+		public:
+		template <typename ALIAS> 
+		static std::enable_if<std::is_convertible<ALIAS, string>::value, string>::type test(ALIAS name);
+
+		template <typename ALIAS> 
+		static std::enable_if<!std::is_convertible<ALIAS, string>::value, ALIAS>::type test(ALIAS name);
+	};
+
 	#define require_(Want, name) \
-		Rubify::AlgebraicEffect<Want, decltype(name)>::require(name)
+		Rubify::AlgebraicEffect<Want, decltype(Rubify::MaybeString<decltype(name)>::test(name))>::require(name)
 
 
 /* ================= Container =================== */

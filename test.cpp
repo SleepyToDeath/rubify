@@ -153,7 +153,7 @@ void need_string(int lvl)
 {
 	if (lvl == 0)
 	{
-		string eleven = require_(string, string("11"));
+		string eleven = require_(string, "11");
 		puts(eleven);
 	}
 	else
