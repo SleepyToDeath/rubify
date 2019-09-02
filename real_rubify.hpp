@@ -443,6 +443,25 @@ namespace Rubify {
 			return *this;
 		}
 
+		vector<T> select( std::function< bool(const T&) > lambda ) {
+			vector<T> ret;
+			each( [&](T& element){
+				if (lambda(element))
+					ret.push_back(element);
+			});
+			return ret;
+		}
+
+		vector<T>& select_( std::function< bool(const T&) > lambda ) {
+			vector<T> ret;
+			each( [&](T& element){
+				if (lambda(element))
+					ret.push_back(element);
+			});
+			(*this) = ret;
+			return *this;
+		}
+
 		vector<T> slice(int start, int length) {
 			if (start < 0)
 				start = this->size() + start;

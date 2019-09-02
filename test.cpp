@@ -87,7 +87,8 @@ struct People {
 (Black,19520,black@gmail.com)
 (Cyan,19520,cyan@gmail.com)
 (Doge,19520,doge@gmail.com)
-(Emma,19520,emma@gmail.com) */
+(Emma,19520,emma@gmail.com) 
+[ (Bran,19104,bran@gmail.com), (Anna,19104,anna@gmail.com), (Chloe,19104,chloe@gmail.com), (Delphi,19104,delphi@gmail.com) ]*/
 void test_group_n_sort() {
 	vector<People> name_list;
 	name_list.push_back( {"Bob", 19026, "bob@gmail.com"} );
@@ -111,6 +112,8 @@ void test_group_n_sort() {
 		.map<string>( [&](vector<People> v)->string { return v.join("\n");} )
 		.join("\n\n")
 	);
+
+	puts( name_list.select([&](const People& p)->bool {return p.zip == 19104;}).to_s() );
 	
 }
 

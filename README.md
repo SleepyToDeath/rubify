@@ -154,6 +154,8 @@ Short circuit
 - `sort_by_`
 - `map` (with/without index)
 - `map_` (with/without index)
+- `select`
+- `select_`
 - `zip`
 - `norm_zip` (duplicate the shorter vector's elements to make them equally long, then zip)
 - `flatten`
