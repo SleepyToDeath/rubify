@@ -26,6 +26,7 @@ void test_access() {
 
 	v.sort_by_<int>([](const int& e)->int { return e; });
 	puts(v.locate( [](int& e)->bool { return e < 2; } ) );
+	puts(v.locate( [](int& e)->bool { return e <= 11; } ) );
 }
 
 /* expect:

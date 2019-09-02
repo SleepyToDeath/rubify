@@ -297,6 +297,8 @@ namespace Rubify {
 				else
 					j = k;
 			}
+			if (go_before_target((*this)[i]))
+				i++;
 			return i;
 		}
 
