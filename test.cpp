@@ -11,7 +11,9 @@ using Rubify::do_a_few_times;
 using Rubify::do_a_few_times_at_interval;
 
 /* expect:
-[ 10, 1, 1, 2, 2 ] */
+[ 10, 1, 1, 2, 2 ] 
+7
+*/
 void test_access() {
 	vector<int> v = std::vector<int>( 10, 0 );
 	v[6] = 1;
@@ -21,6 +23,9 @@ void test_access() {
 		e++;
 	});
 	puts( v.take(7).drop(2).to_s() );
+
+	v.sort_by_<int>([](const int& e)->int { return e; });
+	puts(v.locate( [](int& e)->bool { return e < 2; } ) );
 }
 
 /* expect:
@@ -109,9 +114,14 @@ void test_group_n_sort() {
 	
 }
 
+/* expect:
+123
+5 
+*/
 void test_stoi()
 {
 	puts(string("123").to_i());
+	puts(string("101").to_i(2));
 }
 
 
@@ -119,7 +129,7 @@ void test_debug()
 {
 	for (int i=0; i<30; i++)
 	{
-		puts("["S_(i)"]");
+		puts("[" S_(i) "]");
 		do_once( 1, [&]() { std::cout<<"| do once! |"; } );
 		do_a_few_times( 2, 5, [&]() { std::cout<<"| do 5 times! |"; } );
 		do_at_interval( 3, 3, [&]() { std::cout<<"| do at interval 3! |"; } );

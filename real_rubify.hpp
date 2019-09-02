@@ -57,6 +57,18 @@ namespace Rubify {
 			return std::stoi(*this);
 		}
 
+		int to_i(int base) {
+			return std::stoi(*this, nullptr, base);
+		}
+
+
+		bool start_with(std::string pre) {
+			return this->find_first_of(pre) == 0;
+		}
+
+		bool end_with(std::string suf) {
+			return this->find_last_of(suf) == this->length() - suf.length();
+		}
 
 	};
 
@@ -252,6 +264,7 @@ namespace Rubify {
 		}
 
 
+
 		vector<T> drop(size_t count) {
 			vector<T> ret;
 			if (count > this->size())
@@ -271,6 +284,20 @@ namespace Rubify {
 				ret.push_back( (*this)[i] );
 			}
 			return ret;
+		}
+
+		int locate( std::function< bool(T&) > go_before_target ) {
+			int i=0;
+			int j=this->size()-1;
+			while (i!=j)
+			{
+				int k = (i+j)/2;
+				if (go_before_target((*this)[k]))
+					i = k + 1;
+				else
+					j = k;
+			}
+			return i;
 		}
 
 		/* equivalent to xxx.each do |index, element| */
