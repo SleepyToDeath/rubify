@@ -25,6 +25,7 @@ namespace Rubify {
 
 /* ==================== Macro ==================== */
 	#define puts(exp) std::cout<<(exp)<<std::endl
+	#define errputs(exp) std::cerr<<(exp)<<std::endl
 
 	#define _S_(exp) ( [&]()->std::string { \
 		std::stringstream ss;\
