@@ -213,6 +213,21 @@ namespace Rubify {
 			return ret;
 		}
 
+		static Want require_from(std::thread::id id, Have name) {
+			stack_lock.lock();
+			if (stacks.count(id) == 0)
+				stacks[id].clear();
+			stack_lock.unlock();
+
+			if (stacks[id].empty())
+				throw name;
+			auto current = stacks[id].back();
+			stacks[id].pop_back();
+			Want ret = current(name);
+			stacks[id].push_back(current);
+			return ret;
+		}
+
 		static map<std::thread::id, vector< std::function<Want(Have)> > > stacks;
 		static std::mutex stack_lock;
 	};
@@ -250,6 +265,9 @@ namespace Rubify {
 
 	#define require_(Want, name) \
 		Rubify::AlgebraicEffect<Want, decltype(Rubify::MaybeString<decltype(name)>::test(name))>::require(name)
+
+	#define require_from_(thread_id, Want, name) \
+		Rubify::AlgebraicEffect<Want, decltype(Rubify::MaybeString<decltype(name)>::test(name))>::require_from(thread_id, name)
 
 
 /* ================= Container =================== */
