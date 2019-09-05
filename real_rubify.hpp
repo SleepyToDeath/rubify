@@ -9,6 +9,7 @@
 #include<iostream>
 #include<functional>
 #include<type_traits>
+#include<thread>
 
 namespace Rubify {
 
@@ -143,14 +144,14 @@ namespace Rubify {
 	template<typename T>
 	class PopStackHelper {
 		public:
-		PopStackHelper (vector<T>& src): stack(src), depth(src.size()) {}
-		PopStackHelper (vector<T>&& src) = delete;
+		PopStackHelper (map<std::thread::id, vector<T> >& src): stacks(src), depth(src[std::this_thread::get_id()].size()) {}
+		PopStackHelper (map<std::thread::id, vector<T> >&& src) = delete;
 		~PopStackHelper () {
-			if (depth == stack.size())
-				stack.pop_back();
+			if (depth == stacks[std::this_thread::get_id()].size())
+				stacks[std::this_thread::get_id()].pop_back();
 		}
 		private:
-		vector<T>& stack;
+		map<std::thread::id, vector<T> >& stacks;
 		int depth;
 	};
 
@@ -182,22 +183,22 @@ namespace Rubify {
 	template<typename Want, typename Have>
 	class AlgebraicEffect {
 		public:
-		static vector< std::function<Want(Have)> >& provide(std::function<Want(Have)> handler) {
-			stack.push_back(handler);
-			return stack;
+		static map<std::thread::id, vector< std::function<Want(Have)> > >& provide(std::function<Want(Have)> handler) {
+			stacks[std::this_thread::get_id()].push_back(handler);
+			return stacks;
 		}
 
 		static Want require(Have name) {
-			if (stack.empty())
+			if (stacks[std::this_thread::get_id()].empty())
 				throw name;
-			auto current = stack.back();
-			stack.pop_back();
+			auto current = stacks[std::this_thread::get_id()].back();
+			stacks[std::this_thread::get_id()].pop_back();
 			Want ret = current(name);
-			stack.push_back(current);
+			stacks[std::this_thread::get_id()].push_back(current);
 			return ret;
 		}
 
-		static vector< std::function<Want(Have)> > stack;
+		static map<std::thread::id, vector< std::function<Want(Have)> > > stacks;
 	};
 
 	template <typename T>

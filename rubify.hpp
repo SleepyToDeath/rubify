@@ -4,7 +4,7 @@
 	#include "real_rubify.hpp"
 
 	template<typename Want, typename Have>
-	extern Rubify::vector< std::function<Want(Have)> > Rubify::AlgebraicEffect<Want, Have>::stack;
+	extern Rubify::map<std::thread::id, Rubify::vector< std::function<Want(Have)> > > Rubify::AlgebraicEffect<Want, Have>::stacks;
 
 #endif
 

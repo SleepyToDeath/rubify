@@ -15,8 +15,7 @@ namespace Rubify {
 	}
 
 	template<typename Want, typename Have>
-	vector< std::function<Want(Have)> > AlgebraicEffect<Want, Have>::stack;
-
+	map<std::thread::id, vector< std::function<Want(Have)> > > AlgebraicEffect<Want, Have>::stacks;
 };
 
 
