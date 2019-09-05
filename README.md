@@ -107,6 +107,13 @@ return value. Otherwise the handler can call `return require_(Want, name);`
 to throw the requirement again to upper levels. If no handler in the stack
 can handle it, `name` will be thrown as an exception.
 
+Both operations are thread safe. Each thread is provided with its own
+context. When a new thread is created, nothing is derived from the parent
+thread and the initial stack is empty. If you want to require something from 
+another thread (e.g. worker from master), use `require_from_(thread_id, Want, name)`
+and the other thread's *current* context will be used. This may be dangerous,
+so be careful with it.
+
 One example can be found in `test.cpp` where a recursive function dive into
 multiple levels and require a value provided by an upper level from the bottom.
 
