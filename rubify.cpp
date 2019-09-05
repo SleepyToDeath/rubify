@@ -16,6 +16,9 @@ namespace Rubify {
 
 	template<typename Want, typename Have>
 	map<std::thread::id, vector< std::function<Want(Have)> > > AlgebraicEffect<Want, Have>::stacks;
+
+	template<typename Want, typename Have>
+	std::mutex AlgebraicEffect<Want, Have>::stack_lock;
 };
 
 

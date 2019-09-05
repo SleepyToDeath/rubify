@@ -10,6 +10,7 @@
 #include<functional>
 #include<type_traits>
 #include<thread>
+#include<mutex>
 
 namespace Rubify {
 
@@ -184,21 +185,36 @@ namespace Rubify {
 	class AlgebraicEffect {
 		public:
 		static map<std::thread::id, vector< std::function<Want(Have)> > >& provide(std::function<Want(Have)> handler) {
-			stacks[std::this_thread::get_id()].push_back(handler);
+			auto id = std::this_thread::get_id();
+
+			stack_lock.lock();
+			if (stacks.count(id) == 0)
+				stacks[id].clear();
+			stack_lock.unlock();
+
+			stacks[id].push_back(handler);
 			return stacks;
 		}
 
 		static Want require(Have name) {
-			if (stacks[std::this_thread::get_id()].empty())
+			auto id = std::this_thread::get_id();
+
+			stack_lock.lock();
+			if (stacks.count(id) == 0)
+				stacks[id].clear();
+			stack_lock.unlock();
+
+			if (stacks[id].empty())
 				throw name;
-			auto current = stacks[std::this_thread::get_id()].back();
-			stacks[std::this_thread::get_id()].pop_back();
+			auto current = stacks[id].back();
+			stacks[id].pop_back();
 			Want ret = current(name);
-			stacks[std::this_thread::get_id()].push_back(current);
+			stacks[id].push_back(current);
 			return ret;
 		}
 
 		static map<std::thread::id, vector< std::function<Want(Have)> > > stacks;
+		static std::mutex stack_lock;
 	};
 
 	template <typename T>
