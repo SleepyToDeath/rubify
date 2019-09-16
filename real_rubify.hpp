@@ -56,12 +56,12 @@ namespace Rubify {
 		/* implementation put into cpp to break dependency cycle */
 		vector<string> split(std::string delimiter);
 
-		int to_i() {
-			return std::stoi(*this);
+		long long to_i() {
+			return std::stoll(*this);
 		}
 
-		int to_i(int base) {
-			return std::stoi(*this, nullptr, base);
+		long long to_i(int base) {
+			return std::stoll(*this, nullptr, base);
 		}
 
 
@@ -188,11 +188,13 @@ namespace Rubify {
 			auto id = std::this_thread::get_id();
 
 			stack_lock.lock();
+
 			if (stacks.count(id) == 0)
 				stacks[id].clear();
+			stacks[id].push_back(handler);
+
 			stack_lock.unlock();
 
-			stacks[id].push_back(handler);
 			return stacks;
 		}
 
@@ -200,31 +202,41 @@ namespace Rubify {
 			auto id = std::this_thread::get_id();
 
 			stack_lock.lock();
+
 			if (stacks.count(id) == 0)
 				stacks[id].clear();
-			stack_lock.unlock();
-
 			if (stacks[id].empty())
+			{
+				stack_lock.unlock();
 				throw name;
+			}
+
 			auto current = stacks[id].back();
 			stacks[id].pop_back();
 			Want ret = current(name);
 			stacks[id].push_back(current);
+
+			stack_lock.unlock();
 			return ret;
 		}
 
 		static Want require_from(std::thread::id id, Have name) {
 			stack_lock.lock();
+
 			if (stacks.count(id) == 0)
 				stacks[id].clear();
-			stack_lock.unlock();
-
 			if (stacks[id].empty())
+			{
+				stack_lock.unlock();
 				throw name;
+			}
+
 			auto current = stacks[id].back();
 			stacks[id].pop_back();
 			Want ret = current(name);
 			stacks[id].push_back(current);
+
+			stack_lock.unlock();
 			return ret;
 		}
 
